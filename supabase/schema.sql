@@ -58,6 +58,7 @@ returns table (
 )
 language sql
 stable
+set ivfflat.probes = 100
 as $$
   select
     document_chunks.id,
