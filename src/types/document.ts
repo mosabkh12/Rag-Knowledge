@@ -19,6 +19,14 @@ export interface NewDocumentInput {
   content: string;
 }
 
+export interface DocumentSummary {
+  id: string;
+  title: string;
+  createdAt: string;
+  chunkCount: number;
+  contentPreview: string;
+}
+
 export interface NewChunkInput {
   documentId: string;
   chunkIndex: number;

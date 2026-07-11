@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, ReactNode } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "ghost";
 }
 
 export default function Button({
@@ -13,13 +13,15 @@ export default function Button({
   ...rest
 }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]";
 
   const variants: Record<string, string> = {
     primary:
-      "bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500",
+      "bg-slate-900 text-white shadow-soft hover:bg-slate-800 hover:shadow-card focus-visible:ring-slate-500",
     secondary:
-      "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-slate-400",
+      "border border-slate-200 bg-white text-slate-700 shadow-soft hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-slate-400",
+    ghost:
+      "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-slate-400",
   };
 
   return (

@@ -9,7 +9,12 @@ export const CHUNK_OVERLAP = 180;
 
 export const DOCUMENT_TITLE_MAX_LENGTH = 120;
 export const DOCUMENT_CONTENT_MIN_LENGTH = 50;
-export const DOCUMENT_CONTENT_MAX_LENGTH = 50_000;
+export const DOCUMENT_CONTENT_MAX_LENGTH = 300_000;
+
+export const FILE_MAX_SIZE_BYTES = 15 * 1024 * 1024;
+export const SUPPORTED_FILE_EXTENSIONS = [".txt", ".md", ".markdown", ".pdf", ".docx"];
+
+export const DOCUMENT_PREVIEW_LENGTH = 220;
 
 export const QUESTION_MAX_LENGTH = 500;
 export const DEFAULT_TOP_K = 5;

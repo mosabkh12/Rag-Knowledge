@@ -4,5 +4,20 @@
 
 html,
 body {
-  background-color: #f8fafc;
+  background-color: #f7f8fb;
+}
+
+::selection {
+  background-color: rgb(90 111 240 / 0.2);
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+@layer utilities {
+  .bg-noise {
+    background-image: radial-gradient(circle at 1px 1px, rgb(15 23 42 / 0.06) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
 }

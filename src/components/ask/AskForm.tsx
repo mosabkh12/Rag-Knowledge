@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { Send, MessageCircleQuestion } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/ui/Textarea";
 import Alert from "@/components/ui/Alert";
@@ -47,7 +48,10 @@ export default function AskForm() {
 
   return (
     <div className="flex flex-col gap-8">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-soft sm:p-7"
+      >
         <div className="flex flex-col gap-2">
           <label htmlFor="question" className="text-sm font-medium text-slate-700">
             Your question
@@ -66,6 +70,7 @@ export default function AskForm() {
 
         <div className="flex items-center gap-4">
           <Button type="submit" disabled={isLoading}>
+            <Send size={15} strokeWidth={2.25} />
             {isLoading ? "Thinking..." : "Ask"}
           </Button>
           {isLoading && <LoadingSpinner label="Retrieving context and generating answer..." />}
@@ -77,9 +82,12 @@ export default function AskForm() {
       {status === "success" && result && <AnswerPanel result={result} />}
 
       {status === "idle" && (
-        <p className="text-sm text-slate-400">
-          Ask a question above to see a grounded answer with source citations.
-        </p>
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 py-14 text-center">
+          <MessageCircleQuestion size={26} strokeWidth={1.75} className="text-slate-300" />
+          <p className="max-w-xs text-sm text-slate-400">
+            Ask a question above to see a grounded answer with source citations.
+          </p>
+        </div>
       )}
     </div>
   );
