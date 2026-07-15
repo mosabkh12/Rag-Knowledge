@@ -38,9 +38,8 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isPublic = isPublicPath(pathname) || pathname.startsWith("/api/");
 
-  if (!user && !isPublic) {
+  if (!user && !isPublicPath(pathname)) {
     const redirectUrl = new URL("/signin", request.url);
     redirectUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(redirectUrl);

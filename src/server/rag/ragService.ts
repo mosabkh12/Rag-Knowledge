@@ -11,6 +11,7 @@ import type { RagAnswer } from "@/types/rag";
 
 export interface IngestDocumentResult {
   documentId: string;
+  title: string;
   chunksCreated: number;
 }
 
@@ -25,7 +26,7 @@ export async function ingestDocument(
 
   const textChunks = chunkText(document.content);
   if (textChunks.length === 0) {
-    return { documentId: document.id, chunksCreated: 0 };
+    return { documentId: document.id, title: document.title, chunksCreated: 0 };
   }
 
   const embeddings = await generateEmbeddings(textChunks.map((chunk) => chunk.content));
@@ -39,7 +40,7 @@ export async function ingestDocument(
     }))
   );
 
-  return { documentId: document.id, chunksCreated };
+  return { documentId: document.id, title: document.title, chunksCreated };
 }
 
 /**

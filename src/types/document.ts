@@ -4,6 +4,9 @@ export interface Document {
   content: string;
   createdAt: string;
   createdBy: string | null;
+  storagePath: string | null;
+  fileName: string | null;
+  mimeType: string | null;
 }
 
 export interface DocumentChunk {
@@ -19,6 +22,9 @@ export interface NewDocumentInput {
   title: string;
   content: string;
   createdBy: string | null;
+  storagePath: string | null;
+  fileName: string | null;
+  mimeType: string | null;
 }
 
 export interface DocumentSummary {
@@ -28,6 +34,8 @@ export interface DocumentSummary {
   createdBy: string | null;
   chunkCount: number;
   contentPreview: string;
+  fileName: string | null;
+  hasOriginalFile: boolean;
 }
 
 export interface NewChunkInput {

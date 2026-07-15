@@ -1,6 +1,9 @@
-import { ButtonHTMLAttributes, ReactNode } from "react";
+"use client";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+import { ReactNode } from "react";
+import { motion, type HTMLMotionProps } from "framer-motion";
+
+interface ButtonProps extends HTMLMotionProps<"button"> {
   children: ReactNode;
   variant?: "primary" | "secondary" | "ghost";
 }
@@ -13,7 +16,7 @@ export default function Button({
   ...rest
 }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]";
+    "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-shadow duration-150 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 
   const variants: Record<string, string> = {
     primary:
@@ -25,12 +28,15 @@ export default function Button({
   };
 
   return (
-    <button
+    <motion.button
+      whileHover={disabled ? undefined : { y: -1 }}
+      whileTap={disabled ? undefined : { scale: 0.97, y: 0 }}
+      transition={{ type: "spring", stiffness: 500, damping: 30 }}
       className={`${base} ${variants[variant]} ${className}`}
       disabled={disabled}
       {...rest}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }

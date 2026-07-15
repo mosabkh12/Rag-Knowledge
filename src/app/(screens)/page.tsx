@@ -1,4 +1,8 @@
+"use client";
+
+import { useRef } from "react";
 import Link from "next/link";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
 import {
@@ -11,9 +15,17 @@ import {
   Search,
   MessageSquareText,
   ArrowRight,
+  type LucideIcon,
 } from "lucide-react";
 
-const PIPELINE_STEPS = [
+interface PipelineStep {
+  step: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+}
+
+const PIPELINE_STEPS: PipelineStep[] = [
   {
     step: "01",
     title: "Ingest",
@@ -62,30 +74,57 @@ const TECH_STACK = [
   "Vercel",
 ];
 
+const heroContainer = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.09, delayChildren: 0.05 },
+  },
+};
+
+const heroItem = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const },
+  },
+};
+
 export default function HomePage() {
   return (
     <Container size="wide">
       <div className="flex flex-col gap-24">
-        <section className="flex flex-col items-start gap-6 pt-6 sm:pt-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
+        <motion.section
+          variants={heroContainer}
+          initial="hidden"
+          animate="show"
+          className="flex flex-col items-start gap-6 pt-6 sm:pt-10"
+        >
+          <motion.span
+            variants={heroItem}
+            className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700"
+          >
             <Sparkles size={13} strokeWidth={2.25} />
             Retrieval-Augmented Generation
-          </span>
+          </motion.span>
 
-          <h1 className="max-w-2xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+          <motion.h1
+            variants={heroItem}
+            className="max-w-2xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl"
+          >
             Ask your documents anything.{" "}
             <span className="bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
               Get answers you can trust.
             </span>
-          </h1>
+          </motion.h1>
 
-          <p className="max-w-xl text-base leading-relaxed text-slate-600">
+          <motion.p variants={heroItem} className="max-w-xl text-base leading-relaxed text-slate-600">
             Upload your documents, then ask natural-language questions and get
             answers grounded strictly in your own knowledge base — never
             hallucinated, always cited.
-          </p>
+          </motion.p>
 
-          <div className="mt-2 flex flex-wrap gap-3">
+          <motion.div variants={heroItem} className="mt-2 flex flex-wrap gap-3">
             <Link href="/ingest">
               <Button className="group">
                 <FileUp size={16} strokeWidth={2.25} />
@@ -103,8 +142,8 @@ export default function HomePage() {
                 Ask a Question
               </Button>
             </Link>
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         <section className="flex flex-col gap-8">
           <div className="flex items-baseline justify-between">
@@ -114,45 +153,93 @@ export default function HomePage() {
             <span className="text-sm text-slate-400">six steps, end to end</span>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {PIPELINE_STEPS.map(({ step, title, description, icon: Icon }) => (
-              <div
-                key={step}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-card"
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
-                    <Icon size={17} strokeWidth={2.25} />
-                  </div>
-                  <span className="font-mono text-xs font-medium text-slate-300">
-                    {step}
-                  </span>
-                </div>
-                <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-                  {description}
-                </p>
-              </div>
+          <div
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            style={{ perspective: 1200 }}
+          >
+            {PIPELINE_STEPS.map((item, index) => (
+              <PipelineCard key={item.step} item={item} index={index} />
             ))}
           </div>
         </section>
 
-        <section className="flex flex-col gap-6 pb-10">
+        <motion.section
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col gap-6 pb-10"
+        >
           <h2 className="text-lg font-semibold tracking-tight text-slate-900">
             Built with
           </h2>
           <div className="flex flex-wrap gap-2">
-            {TECH_STACK.map((tech) => (
-              <span
+            {TECH_STACK.map((tech, index) => (
+              <motion.span
                 key={tech}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35, delay: index * 0.05 }}
                 className="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 shadow-sm"
               >
                 {tech}
-              </span>
+              </motion.span>
             ))}
           </div>
-        </section>
+        </motion.section>
       </div>
     </Container>
+  );
+}
+
+function PipelineCard({ item, index }: { item: PipelineStep; index: number }) {
+  const { step, title, description, icon: Icon } = item;
+  const ref = useRef<HTMLDivElement>(null);
+
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+  const rotateX = useSpring(useTransform(mouseY, [0, 1], [9, -9]), {
+    stiffness: 300,
+    damping: 25,
+  });
+  const rotateY = useSpring(useTransform(mouseX, [0, 1], [-9, 9]), {
+    stiffness: 300,
+    damping: 25,
+  });
+
+  function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+    const bounds = ref.current?.getBoundingClientRect();
+    if (!bounds) return;
+    mouseX.set((event.clientX - bounds.left) / bounds.width);
+    mouseY.set((event.clientY - bounds.top) / bounds.height);
+  }
+
+  function handleMouseLeave() {
+    mouseX.set(0.5);
+    mouseY.set(0.5);
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50, rotateX: -25 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.65, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-shadow hover:shadow-card"
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
+          <Icon size={17} strokeWidth={2.25} />
+        </div>
+        <span className="font-mono text-xs font-medium text-slate-300">{step}</span>
+      </div>
+      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+      <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{description}</p>
+    </motion.div>
   );
 }

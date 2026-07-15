@@ -6,29 +6,63 @@ import { SUPPORTED_FILE_EXTENSIONS } from "@/lib/constants";
 
 const TEXT_EXTENSIONS = [".txt", ".md", ".markdown"];
 
+const MIME_TYPES: Record<string, string> = {
+  ".txt": "text/plain",
+  ".md": "text/markdown",
+  ".markdown": "text/markdown",
+  ".pdf": "application/pdf",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+};
+
 /**
- * Extracts plain text from an uploaded file based on its extension.
+ * Best-effort MIME type for a filename, used when storing the original
+ * file so it opens correctly (e.g. inline PDF rendering) in a browser.
+ */
+export function getMimeType(filename: string): string {
+  const extension = getExtension(filename);
+  return MIME_TYPES[extension] ?? "application/octet-stream";
+}
+
+export function getExtension(filename: string): string {
+  const match = filename.toLowerCase().match(/\.[^./]+$/);
+  return match ? match[0] : "";
+}
+
+export function isSupportedDocumentExtension(filename: string): boolean {
+  const extension = getExtension(filename);
+  return extension === ".pdf" || extension === ".docx" || TEXT_EXTENSIONS.includes(extension);
+}
+
+/**
+ * Extracts plain text from a file's raw bytes based on its extension.
  * Supports .txt/.md (read as-is), .pdf (pdf-parse), and .docx (mammoth).
  */
-export async function extractTextFromFile(file: File): Promise<string> {
-  const name = file.name.toLowerCase();
-  const buffer = Buffer.from(await file.arrayBuffer());
+export async function extractTextFromBuffer(buffer: Buffer, filename: string): Promise<string> {
+  const extension = getExtension(filename);
 
-  if (name.endsWith(".pdf")) {
+  if (extension === ".pdf") {
     return extractPdfText(buffer);
   }
 
-  if (name.endsWith(".docx")) {
+  if (extension === ".docx") {
     return extractDocxText(buffer);
   }
 
-  if (TEXT_EXTENSIONS.some((extension) => name.endsWith(extension))) {
+  if (TEXT_EXTENSIONS.includes(extension)) {
     return buffer.toString("utf-8");
   }
 
   throw new ValidationError(
     `Unsupported file type. Supported formats: ${SUPPORTED_FILE_EXTENSIONS.join(", ")}.`
   );
+}
+
+/**
+ * Convenience wrapper for a browser-provided File/Blob.
+ */
+export async function extractTextFromFile(file: File): Promise<string> {
+  const buffer = Buffer.from(await file.arrayBuffer());
+  return extractTextFromBuffer(buffer, file.name);
 }
 
 async function extractPdfText(buffer: Buffer): Promise<string> {

@@ -7,9 +7,20 @@ export interface CreateDocumentRequest {
   content: string;
 }
 
-export interface CreateDocumentResponse {
+export interface IngestedDocument {
   documentId: string;
+  title: string;
   chunksCreated: number;
+}
+
+export interface IngestFailure {
+  fileName: string;
+  error: string;
+}
+
+export interface CreateDocumentResponse {
+  documents: IngestedDocument[];
+  failed: IngestFailure[];
 }
 
 export interface ListDocumentsResponse {
@@ -22,6 +33,8 @@ export interface DocumentDetailResponse {
   content: string;
   createdAt: string;
   createdBy: string | null;
+  fileName: string | null;
+  hasOriginalFile: boolean;
 }
 
 export interface AskRequest {

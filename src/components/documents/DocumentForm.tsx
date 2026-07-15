@@ -12,12 +12,28 @@ import type { CreateDocumentResponse } from "@/types/api";
 type Status = "idle" | "loading" | "success" | "error";
 type Mode = "paste" | "upload";
 
-const ACCEPTED_FILE_EXTENSIONS = ".txt,.md,.markdown,.pdf,.docx";
+const ACCEPTED_FILE_EXTENSIONS = ".txt,.md,.markdown,.pdf,.docx,.zip";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function buildSuccessMessage(result: CreateDocumentResponse): string {
+  const totalChunks = result.documents.reduce((sum, doc) => sum + doc.chunksCreated, 0);
+
+  const base =
+    result.documents.length === 1
+      ? `Document saved successfully. ${totalChunks} chunk(s) were created and embedded.`
+      : `${result.documents.length} documents saved successfully (${totalChunks} chunk(s) total).`;
+
+  if (result.failed.length === 0) {
+    return base;
+  }
+
+  const failedNames = result.failed.map((f) => f.fileName).join(", ");
+  return `${base} ${result.failed.length} file(s) could not be added: ${failedNames}.`;
 }
 
 export default function DocumentForm() {
@@ -31,6 +47,7 @@ export default function DocumentForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isLoading = status === "loading";
+  const isZipFile = file !== null && file.name.toLowerCase().endsWith(".zip");
 
   function switchMode(nextMode: Mode) {
     setMode(nextMode);
@@ -90,9 +107,7 @@ export default function DocumentForm() {
 
       const result = data as CreateDocumentResponse;
       setStatus("success");
-      setMessage(
-        `Document saved successfully. ${result.chunksCreated} chunk(s) were created and embedded.`
-      );
+      setMessage(buildSuccessMessage(result));
       setTitle("");
       setContent("");
       setFile(null);
@@ -136,25 +151,27 @@ export default function DocumentForm() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor="title" className="text-sm font-medium text-slate-700">
-          Title
-          {mode === "upload" && (
-            <span className="ml-1.5 font-normal text-slate-400">
-              (optional — defaults to filename)
-            </span>
-          )}
-        </label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="e.g. Employee Onboarding Guide"
-          maxLength={120}
-          required={mode === "paste"}
-          disabled={isLoading}
-        />
-      </div>
+      {!isZipFile && (
+        <div className="flex flex-col gap-2">
+          <label htmlFor="title" className="text-sm font-medium text-slate-700">
+            Title
+            {mode === "upload" && (
+              <span className="ml-1.5 font-normal text-slate-400">
+                (optional — defaults to filename)
+              </span>
+            )}
+          </label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="e.g. Employee Onboarding Guide"
+            maxLength={120}
+            required={mode === "paste"}
+            disabled={isLoading}
+          />
+        </div>
+      )}
 
       {mode === "paste" ? (
         <div className="flex flex-col gap-2">
@@ -199,7 +216,7 @@ export default function DocumentForm() {
               drag and drop
             </p>
             <p className="text-xs text-slate-400">
-              .txt, .md, .pdf, .docx — max 15MB
+              .txt, .md, .pdf, .docx, or .zip (multiple files) — max 15MB per file
             </p>
             <input
               ref={fileInputRef}
@@ -231,6 +248,12 @@ export default function DocumentForm() {
                 <X size={15} strokeWidth={2.25} />
               </button>
             </div>
+          )}
+
+          {isZipFile && (
+            <p className="text-xs text-slate-400">
+              Each supported file inside the archive will be added as its own document, titled from its filename.
+            </p>
           )}
         </div>
       )}

@@ -14,6 +14,13 @@ export const DOCUMENT_CONTENT_MAX_LENGTH = 300_000;
 export const FILE_MAX_SIZE_BYTES = 15 * 1024 * 1024;
 export const SUPPORTED_FILE_EXTENSIONS = [".txt", ".md", ".markdown", ".pdf", ".docx"];
 
+export const ZIP_EXTENSION = ".zip";
+export const ZIP_MAX_SIZE_BYTES = 50 * 1024 * 1024;
+export const ZIP_MAX_ENTRIES = 20;
+
+export const DOCUMENT_STORAGE_BUCKET = "document-files";
+export const SIGNED_FILE_URL_EXPIRY_SECONDS = 60 * 5;
+
 export const DOCUMENT_PREVIEW_LENGTH = 220;
 
 export const QUESTION_MAX_LENGTH = 500;

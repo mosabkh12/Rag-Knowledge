@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { FileUp, Library, MessageCircleQuestion, ShieldCheck } from "lucide-react";
 import SignOutButton from "@/components/auth/SignOutButton";
 import type { Profile } from "@/types/auth";
@@ -11,6 +12,8 @@ const NAV_LINKS = [
   { href: "/ingest", label: "Add Document", icon: FileUp },
   { href: "/ask", label: "Ask", icon: MessageCircleQuestion },
 ];
+
+const ADMIN_LINK = { href: "/admin", label: "Admin", icon: ShieldCheck };
 
 interface HeaderProps {
   profile: Profile | null;
@@ -43,6 +46,7 @@ function LogoMark() {
 
 export default function Header({ profile }: HeaderProps) {
   const pathname = usePathname();
+  const links = profile?.role === "admin" ? [...NAV_LINKS, ADMIN_LINK] : NAV_LINKS;
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/75 backdrop-blur-md">
@@ -56,45 +60,37 @@ export default function Header({ profile }: HeaderProps) {
 
         {profile && (
           <nav className="flex items-center gap-1 overflow-x-auto">
-            {NAV_LINKS.map((link) => {
+            {links.map((link) => {
               const isActive = pathname === link.href;
               const Icon = link.icon;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`group flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  }`}
+                  className="relative flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium"
                 >
-                  <Icon
-                    size={15}
-                    strokeWidth={2.25}
-                    className={isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"}
-                  />
-                  {link.label}
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-active-pill"
+                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                      className="absolute inset-0 rounded-full bg-slate-900"
+                    />
+                  )}
+                  <span
+                    className={`relative z-10 flex items-center gap-1.5 transition-colors ${
+                      isActive ? "text-white" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    <Icon
+                      size={15}
+                      strokeWidth={2.25}
+                      className={isActive ? "text-white" : "text-slate-400"}
+                    />
+                    {link.label}
+                  </span>
                 </Link>
               );
             })}
-            {profile.role === "admin" && (
-              <Link
-                href="/admin"
-                className={`group flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                  pathname === "/admin"
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                <ShieldCheck
-                  size={15}
-                  strokeWidth={2.25}
-                  className={pathname === "/admin" ? "text-white" : "text-slate-400 group-hover:text-slate-600"}
-                />
-                Admin
-              </Link>
-            )}
           </nav>
         )}
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import Header from "@/components/layout/Header";
+import PageTransition from "@/components/layout/PageTransition";
 import { getCurrentProfile } from "@/server/auth/session";
 import "./globals.css";
 
@@ -30,7 +31,9 @@ export default async function RootLayout({
       <body className="min-h-screen bg-[#f7f8fb] font-sans text-slate-900 antialiased">
         <div className="pointer-events-none fixed inset-0 -z-10 bg-grid-slate [mask-image:radial-gradient(ellipse_80%_60%_at_50%_-10%,black,transparent)]" />
         <Header profile={profile} />
-        <main className="relative">{children}</main>
+        <main className="relative">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </body>
     </html>
   );

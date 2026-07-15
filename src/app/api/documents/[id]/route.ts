@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDocumentById, deleteDocument } from "@/server/db/documentRepository";
+import { deleteDocumentFile } from "@/server/storage/documentFileStorage";
 import { requireUser } from "@/server/auth/session";
 import { AppError, toStatusCode, toUserFacingMessage } from "@/lib/errors";
 import type { DocumentDetailResponse } from "@/types/api";
@@ -20,6 +21,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
       content: document.content,
       createdAt: document.createdAt,
       createdBy: document.createdBy,
+      fileName: document.fileName,
+      hasOriginalFile: document.storagePath !== null,
     };
 
     return NextResponse.json(response, { status: 200 });
@@ -43,6 +46,11 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     }
 
     await deleteDocument(id);
+
+    if (document.storagePath) {
+      await deleteDocumentFile(document.storagePath);
+    }
+
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     return NextResponse.json(

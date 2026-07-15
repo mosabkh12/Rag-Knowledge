@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   FileText,
   CalendarDays,
@@ -11,6 +12,7 @@ import {
   Loader2,
   Library,
   Plus,
+  ExternalLink,
 } from "lucide-react";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
@@ -24,6 +26,16 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
   year: "numeric",
 });
+
+const listContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+
+const listItem = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const } },
+};
 
 interface DocumentListProps {
   currentUserId: string | null;
@@ -101,7 +113,12 @@ export default function DocumentList({ currentUserId, isAdmin }: DocumentListPro
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <motion.div
+      variants={listContainer}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col gap-3"
+    >
       {documents.map((document) => (
         <DocumentCard
           key={document.id}
@@ -111,7 +128,7 @@ export default function DocumentList({ currentUserId, isAdmin }: DocumentListPro
           isOwnDocument={currentUserId !== null && document.createdBy === currentUserId}
         />
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -181,7 +198,12 @@ function DocumentCard({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-card">
+    <motion.div
+      variants={listItem}
+      layout
+      transition={{ layout: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }}
+      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-card"
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
           <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
@@ -205,43 +227,61 @@ function DocumentCard({
                 <Layers size={12} strokeWidth={2.25} />
                 {document.chunkCount} chunk{document.chunkCount === 1 ? "" : "s"}
               </span>
+              {document.fileName && (
+                <span className="truncate text-slate-400">{document.fileName}</span>
+              )}
             </div>
           </div>
         </div>
 
-        {canDelete && (
-          <div className="flex shrink-0 items-center gap-1.5">
-            {isConfirmingDelete ? (
-              <>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {document.hasOriginalFile && (
+            <a
+              href={`/api/documents/${document.id}/file`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+              aria-label="Open original file"
+            >
+              <ExternalLink size={13} strokeWidth={2.25} />
+              Open file
+            </a>
+          )}
+
+          {canDelete && (
+            <>
+              {isConfirmingDelete ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-60"
+                  >
+                    {isDeleting ? "Deleting..." : "Confirm delete"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingDelete(false)}
+                    disabled={isDeleting}
+                    className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
                 <button
                   type="button"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-60"
+                  onClick={() => setIsConfirmingDelete(true)}
+                  className="rounded-full p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                  aria-label="Delete document"
                 >
-                  {isDeleting ? "Deleting..." : "Confirm delete"}
+                  <Trash2 size={15} strokeWidth={2.25} />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setIsConfirmingDelete(false)}
-                  disabled={isDeleting}
-                  className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsConfirmingDelete(true)}
-                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                aria-label="Delete document"
-              >
-                <Trash2 size={15} strokeWidth={2.25} />
-              </button>
-            )}
-          </div>
-        )}
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       <button
@@ -273,6 +313,6 @@ function DocumentCard({
           <Alert variant="error">{errorMessage}</Alert>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
