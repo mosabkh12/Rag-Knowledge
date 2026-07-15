@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.2",
     "@supabase/supabase-js": "^2.45.4",
     "geist": "^1.7.2",
     "lucide-react": "^1.24.0",

@@ -1,5 +1,6 @@
 import type { RetrievedChunk } from "./rag";
 import type { DocumentSummary } from "./document";
+import type { Profile, UserRole } from "./auth";
 
 export interface CreateDocumentRequest {
   title: string;
@@ -20,6 +21,7 @@ export interface DocumentDetailResponse {
   title: string;
   content: string;
   createdAt: string;
+  createdBy: string | null;
 }
 
 export interface AskRequest {
@@ -34,4 +36,16 @@ export interface AskResponse {
 
 export interface ApiErrorResponse {
   error: string;
+}
+
+export interface ListUsersResponse {
+  users: Profile[];
+}
+
+export interface UpdateUserRoleRequest {
+  role: UserRole;
+}
+
+export interface UpdateUserRoleResponse {
+  user: Profile;
 }

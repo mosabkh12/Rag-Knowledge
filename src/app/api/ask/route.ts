@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateAskRequest } from "@/server/validators/askValidators";
 import { answerQuestion } from "@/server/rag/ragService";
+import { requireUser } from "@/server/auth/session";
 import { toStatusCode, toUserFacingMessage } from "@/lib/errors";
 import type { AskResponse } from "@/types/api";
 
 export async function POST(request: NextRequest) {
   try {
+    await requireUser();
     const body = await request.json();
     const { question, topK } = validateAskRequest(body);
 

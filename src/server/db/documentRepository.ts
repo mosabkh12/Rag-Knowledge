@@ -9,6 +9,7 @@ interface DocumentRow {
   title: string;
   content: string;
   created_at: string;
+  created_by: string | null;
 }
 
 interface DocumentListRow extends DocumentRow {
@@ -21,6 +22,7 @@ function toDocument(row: DocumentRow): Document {
     title: row.title,
     content: row.content,
     createdAt: row.created_at,
+    createdBy: row.created_by,
   };
 }
 
@@ -29,6 +31,7 @@ function toDocumentSummary(row: DocumentListRow): DocumentSummary {
     id: row.id,
     title: row.title,
     createdAt: row.created_at,
+    createdBy: row.created_by,
     chunkCount: row.document_chunks[0]?.count ?? 0,
     contentPreview: row.content.slice(0, DOCUMENT_PREVIEW_LENGTH),
   };
@@ -42,8 +45,8 @@ export async function insertDocument(input: NewDocumentInput): Promise<Document>
 
   const { data, error } = await supabase
     .from("documents")
-    .insert({ title: input.title, content: input.content })
-    .select("id, title, content, created_at")
+    .insert({ title: input.title, content: input.content, created_by: input.createdBy })
+    .select("id, title, content, created_at, created_by")
     .single<DocumentRow>();
 
   if (error || !data) {
@@ -62,7 +65,7 @@ export async function listDocuments(): Promise<DocumentSummary[]> {
 
   const { data, error } = await supabase
     .from("documents")
-    .select("id, title, content, created_at, document_chunks(count)")
+    .select("id, title, content, created_at, created_by, document_chunks(count)")
     .order("created_at", { ascending: false })
     .returns<DocumentListRow[]>();
 
@@ -81,7 +84,7 @@ export async function getDocumentById(id: string): Promise<Document> {
 
   const { data, error } = await supabase
     .from("documents")
-    .select("id, title, content, created_at")
+    .select("id, title, content, created_at, created_by")
     .eq("id", id)
     .maybeSingle<DocumentRow>();
 

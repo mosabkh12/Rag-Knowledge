@@ -25,7 +25,12 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-export default function DocumentList() {
+interface DocumentListProps {
+  currentUserId: string | null;
+  isAdmin: boolean;
+}
+
+export default function DocumentList({ currentUserId, isAdmin }: DocumentListProps) {
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -98,7 +103,13 @@ export default function DocumentList() {
   return (
     <div className="flex flex-col gap-3">
       {documents.map((document) => (
-        <DocumentCard key={document.id} document={document} onDeleted={handleDeleted} />
+        <DocumentCard
+          key={document.id}
+          document={document}
+          onDeleted={handleDeleted}
+          canDelete={isAdmin || (currentUserId !== null && document.createdBy === currentUserId)}
+          isOwnDocument={currentUserId !== null && document.createdBy === currentUserId}
+        />
       ))}
     </div>
   );
@@ -107,9 +118,13 @@ export default function DocumentList() {
 function DocumentCard({
   document,
   onDeleted,
+  canDelete,
+  isOwnDocument,
 }: {
   document: DocumentSummary;
   onDeleted: (id: string) => void;
+  canDelete: boolean;
+  isOwnDocument: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [fullContent, setFullContent] = useState<string | null>(null);
@@ -173,7 +188,14 @@ function DocumentCard({
             <FileText size={16} strokeWidth={2.25} />
           </div>
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-semibold text-slate-900">{document.title}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="truncate text-sm font-semibold text-slate-900">{document.title}</h3>
+              {isOwnDocument && (
+                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+                  Added by you
+                </span>
+              )}
+            </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
               <span className="flex items-center gap-1">
                 <CalendarDays size={12} strokeWidth={2.25} />
@@ -187,37 +209,39 @@ function DocumentCard({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
-          {isConfirmingDelete ? (
-            <>
+        {canDelete && (
+          <div className="flex shrink-0 items-center gap-1.5">
+            {isConfirmingDelete ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-60"
+                >
+                  {isDeleting ? "Deleting..." : "Confirm delete"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingDelete(false)}
+                  disabled={isDeleting}
+                  className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
               <button
                 type="button"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-60"
+                onClick={() => setIsConfirmingDelete(true)}
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                aria-label="Delete document"
               >
-                {isDeleting ? "Deleting..." : "Confirm delete"}
+                <Trash2 size={15} strokeWidth={2.25} />
               </button>
-              <button
-                type="button"
-                onClick={() => setIsConfirmingDelete(false)}
-                disabled={isDeleting}
-                className="rounded-full px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsConfirmingDelete(true)}
-              className="rounded-full p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
-              aria-label="Delete document"
-            >
-              <Trash2 size={15} strokeWidth={2.25} />
-            </button>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       <button

@@ -3,6 +3,7 @@ export interface Document {
   title: string;
   content: string;
   createdAt: string;
+  createdBy: string | null;
 }
 
 export interface DocumentChunk {
@@ -17,12 +18,14 @@ export interface DocumentChunk {
 export interface NewDocumentInput {
   title: string;
   content: string;
+  createdBy: string | null;
 }
 
 export interface DocumentSummary {
   id: string;
   title: string;
   createdAt: string;
+  createdBy: string | null;
   chunkCount: number;
   contentPreview: string;
 }

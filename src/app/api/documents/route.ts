@@ -7,13 +7,14 @@ import {
 import { extractTextFromFile } from "@/server/rag/fileExtractor";
 import { ingestDocument } from "@/server/rag/ragService";
 import { listDocuments } from "@/server/db/documentRepository";
+import { requireUser } from "@/server/auth/session";
 import { ValidationError, toStatusCode, toUserFacingMessage } from "@/lib/errors";
 import { FILE_MAX_SIZE_BYTES } from "@/lib/constants";
 import type { CreateDocumentResponse, ListDocumentsResponse } from "@/types/api";
-import type { NewDocumentInput } from "@/types/document";
 
 export async function GET() {
   try {
+    await requireUser();
     const documents = await listDocuments();
     const response: ListDocumentsResponse = { documents };
     return NextResponse.json(response, { status: 200 });
@@ -27,13 +28,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const profile = await requireUser();
     const contentType = request.headers.get("content-type") ?? "";
 
-    const input = contentType.includes("multipart/form-data")
+    const { title, content } = contentType.includes("multipart/form-data")
       ? await parseFileUpload(request)
       : validateCreateDocumentRequest(await request.json());
 
-    const result = await ingestDocument(input);
+    const result = await ingestDocument({ title, content, createdBy: profile.id });
 
     const response: CreateDocumentResponse = {
       documentId: result.documentId,
@@ -49,7 +51,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function parseFileUpload(request: NextRequest): Promise<NewDocumentInput> {
+async function parseFileUpload(
+  request: NextRequest
+): Promise<{ title: string; content: string }> {
   const formData = await request.formData();
   const file = formData.get("file");
 

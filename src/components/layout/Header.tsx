@@ -2,13 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileUp, Library, MessageCircleQuestion } from "lucide-react";
+import { FileUp, Library, MessageCircleQuestion, ShieldCheck } from "lucide-react";
+import SignOutButton from "@/components/auth/SignOutButton";
+import type { Profile } from "@/types/auth";
 
 const NAV_LINKS = [
   { href: "/documents", label: "Library", icon: Library },
   { href: "/ingest", label: "Add Document", icon: FileUp },
   { href: "/ask", label: "Ask", icon: MessageCircleQuestion },
 ];
+
+interface HeaderProps {
+  profile: Profile | null;
+}
 
 function LogoMark() {
   return (
@@ -35,42 +41,88 @@ function LogoMark() {
   );
 }
 
-export default function Header() {
+export default function Header({ profile }: HeaderProps) {
   const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/75 backdrop-blur-md">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3.5 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <LogoMark />
-          <span className="text-[15px] font-semibold tracking-tight text-slate-900">
+          <span className="hidden text-[15px] font-semibold tracking-tight text-slate-900 sm:inline">
             RAG Knowledge Base
           </span>
         </Link>
-        <nav className="flex items-center gap-1">
-          {NAV_LINKS.map((link) => {
-            const isActive = pathname === link.href;
-            const Icon = link.icon;
-            return (
+
+        {profile && (
+          <nav className="flex items-center gap-1 overflow-x-auto">
+            {NAV_LINKS.map((link) => {
+              const isActive = pathname === link.href;
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`group flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  }`}
+                >
+                  <Icon
+                    size={15}
+                    strokeWidth={2.25}
+                    className={isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"}
+                  />
+                  {link.label}
+                </Link>
+              );
+            })}
+            {profile.role === "admin" && (
               <Link
-                key={link.href}
-                href={link.href}
-                className={`group flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                  isActive
+                href="/admin"
+                className={`group flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                  pathname === "/admin"
                     ? "bg-slate-900 text-white"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
-                <Icon
+                <ShieldCheck
                   size={15}
                   strokeWidth={2.25}
-                  className={isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"}
+                  className={pathname === "/admin" ? "text-white" : "text-slate-400 group-hover:text-slate-600"}
                 />
-                {link.label}
+                Admin
               </Link>
-            );
-          })}
-        </nav>
+            )}
+          </nav>
+        )}
+
+        <div className="flex shrink-0 items-center gap-2">
+          {profile ? (
+            <>
+              <span className="hidden max-w-[160px] truncate text-xs text-slate-400 md:inline">
+                {profile.email}
+              </span>
+              <SignOutButton />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/signin"
+                className="rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-full bg-slate-900 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

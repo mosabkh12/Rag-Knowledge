@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDocumentById, deleteDocument } from "@/server/db/documentRepository";
-import { toStatusCode, toUserFacingMessage } from "@/lib/errors";
+import { requireUser } from "@/server/auth/session";
+import { AppError, toStatusCode, toUserFacingMessage } from "@/lib/errors";
 import type { DocumentDetailResponse } from "@/types/api";
 
 interface RouteParams {
@@ -9,6 +10,7 @@ interface RouteParams {
 
 export async function GET(_request: Request, { params }: RouteParams) {
   try {
+    await requireUser();
     const { id } = await params;
     const document = await getDocumentById(id);
 
@@ -17,6 +19,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
       title: document.title,
       content: document.content,
       createdAt: document.createdAt,
+      createdBy: document.createdBy,
     };
 
     return NextResponse.json(response, { status: 200 });
@@ -30,7 +33,15 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
   try {
+    const profile = await requireUser();
     const { id } = await params;
+    const document = await getDocumentById(id);
+
+    const isOwner = document.createdBy === profile.id;
+    if (profile.role !== "admin" && !isOwner) {
+      throw new AppError("You can only delete documents you added.", 403);
+    }
+
     await deleteDocument(id);
     return new NextResponse(null, { status: 204 });
   } catch (error) {

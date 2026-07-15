@@ -1,11 +1,7 @@
--- RAG Knowledge Base Assistant - Database Schema
---
--- This is a consolidated reference of the full current schema — useful
--- for a quick fresh setup. The source of truth for changes is
--- supabase/migrations/, applied in order; whenever a new migration is
--- added, fold the same change in here too so this file stays a
--- complete, accurate snapshot. Safe to re-run: every statement is
--- idempotent.
+-- Initial schema: documents, chunks, profiles, RLS, and the similarity
+-- search RPC. Every statement is idempotent, so this is safe to run
+-- against a fresh database or one that already has some of these
+-- objects (e.g. from before migrations were adopted).
 
 -- ---------------------------------------------------------------------------
 -- Extensions
